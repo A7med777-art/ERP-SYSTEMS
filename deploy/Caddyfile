@@ -1,0 +1,15 @@
+# Static hosting for index.html with automatic HTTPS (Let's Encrypt).
+# DOMAIN can be a real domain or a free sslip.io name such as 203-0-113-10.sslip.io
+{$DOMAIN} {
+	root * /srv
+	encode zstd gzip
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Cache-Control "public, max-age=300"
+	}
+	try_files {path} /index.html
+	file_server
+}
