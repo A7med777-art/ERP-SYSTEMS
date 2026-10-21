@@ -1,6 +1,7 @@
-# ERP Systems — landing page & client onboarding
+# ERP & CRM for Business Owners — landing page & client onboarding
 
-A single self-contained `index.html` (fonts embedded, no frameworks): fullscreen black stage,
+Marketing site for custom ERP & CRM systems for business owners. A single self-contained
+`index.html` (fonts embedded, no frameworks): fullscreen black stage,
 graded looping video, one-shot entrance animation, mobile burger menu, and a 4-step onboarding
 flow where clients choose **what to build** (modules), **their industry**, and **their data**,
 then leave their company details.
