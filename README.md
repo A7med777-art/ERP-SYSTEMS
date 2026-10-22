@@ -23,12 +23,15 @@ Move a lead through `status`: `new → contacted → onboarding → active` (or 
 
 ## Hosting
 
-### GitHub Pages (free subdomain, global CDN)
+### GitHub Pages (free, live now)
 
-`.github/workflows/pages.yml` publishes `index.html` on every push.
-One-time setup: **Settings → Pages → Build and deployment → Source: GitHub Actions**,
-then re-run the workflow. The site is served at
-`https://a7med777-art.github.io/ERP-SYSTEMS/`.
+Live at **https://a7med777-art.github.io/ERP-SYSTEMS/** (served from the `gh-pages` branch).
+
+To change the site, edit `index.html` on the default branch (on github.com: open the file,
+click the pencil, commit). The **Publish site** workflow copies it to `gh-pages`, waits until the
+live page matches, and checks that Supabase still accepts sign-ups but refuses reads.
+It takes about a minute; the result shows under the **Actions** tab.
+Run the workflow manually with "Also send one real test sign-up" to test a full submission.
 
 ### Hetzner (optional, your own server)
 

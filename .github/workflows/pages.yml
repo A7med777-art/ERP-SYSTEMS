@@ -1,36 +1,53 @@
-name: Deploy site to GitHub Pages
+name: Publish site
 
+# Every change to index.html on the default branch is copied to the gh-pages
+# branch (which GitHub Pages serves), then the live site and the database are checked.
 on:
   push:
     branches: [main, claude/magical-pascal-dvin1v]
+    paths: [index.html, scripts/verify.sh, .github/workflows/pages.yml]
   workflow_dispatch:
+    inputs:
+      insert_test:
+        description: "Also send one real test sign-up (marked 'Deploy check')"
+        type: boolean
+        default: false
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
-  deploy:
+  publish:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/configure-pages@v5
-      - name: Build site folder
+
+      - name: Sanity-check the page
         run: |
-          mkdir -p _site
-          cp index.html _site/index.html
-          cp index.html _site/404.html
-          touch _site/.nojekyll
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: _site
-      - id: deployment
-        uses: actions/deploy-pages@v4
+          test -s index.html
+          grep -q '</html>' index.html
+          grep -q 'id="jform"' index.html
+
+      - name: Push to gh-pages
+        run: |
+          mkdir site
+          cp index.html site/index.html
+          cp index.html site/404.html
+          touch site/.nojekyll
+          cd site
+          git init -q -b gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Publish ${GITHUB_SHA::7}"
+          git push -q -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" gh-pages
+
+      - name: Verify live site and database
+        env:
+          SITE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
+          INSERT_TEST: ${{ inputs.insert_test || 'false' }}
+        run: bash scripts/verify.sh
