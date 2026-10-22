@@ -159,6 +159,69 @@ create trigger erp_signups_notify
 
 
 -- ---------------------------------------------------------------------
+-- 3b) Anti-spam guard (runs before every insert coming from the website)
+--     * max 5 requests per hour from one internet address
+--     * max 3 requests per day for one email address
+--     * max 300 requests per hour for the whole site (stops floods)
+--     * id / created_at / status are set by the server, never by the visitor
+-- ---------------------------------------------------------------------
+create table if not exists private.signup_attempts (
+  ip_hash text        not null,
+  at      timestamptz not null default now()
+);
+create index if not exists signup_attempts_ip_at_idx on private.signup_attempts (ip_hash, at desc);
+revoke all on table private.signup_attempts from public, anon, authenticated;
+create index if not exists erp_signups_email_day_idx on public.erp_signups (lower(email), created_at desc);
+
+create or replace function private.guard_signup()
+returns trigger language plpgsql security definer set search_path = '' as $$
+declare
+  caller  text := coalesce(nullif(current_setting('role', true), 'none'), '');
+  hdrs    jsonb := coalesce(nullif(current_setting('request.headers', true), '')::jsonb, '{}'::jsonb);
+  ip      text;
+  v_hash  text;
+begin
+  -- Only visitors coming through the public API are limited; you (dashboard/SQL) are not.
+  if caller not in ('anon', 'authenticated') then
+    return new;
+  end if;
+
+  ip := coalesce(nullif(hdrs->>'cf-connecting-ip', ''),
+                 nullif(hdrs->>'x-real-ip', ''),
+                 nullif(trim(split_part(hdrs->>'x-forwarded-for', ',', 1)), ''),
+                 'unknown');
+  v_hash := encode(extensions.digest(ip, 'sha256'), 'hex');   -- the raw address is never stored
+
+  if (select count(*) from private.signup_attempts a
+       where a.ip_hash = v_hash and a.at > now() - interval '1 hour') >= 5 then
+    raise exception 'rate_limited' using errcode = 'P0001', hint = 'Too many requests from this network. Try again later.';
+  end if;
+  if (select count(*) from public.erp_signups s
+       where lower(s.email) = lower(new.email) and s.created_at > now() - interval '24 hours') >= 3 then
+    raise exception 'rate_limited' using errcode = 'P0001', hint = 'This email already sent several requests today.';
+  end if;
+  if (select count(*) from public.erp_signups s where s.created_at > now() - interval '1 hour') >= 300 then
+    raise exception 'rate_limited' using errcode = 'P0001', hint = 'The site is receiving too many requests. Try again later.';
+  end if;
+
+  -- At most 300 rows an hour can land here (the site-wide cap), so it stays small.
+  insert into private.signup_attempts (ip_hash) values (v_hash);
+
+  new.id         := coalesce(new.id, gen_random_uuid());
+  new.created_at := now();
+  new.status     := 'new';
+  new.email      := lower(trim(new.email));
+  return new;
+end $$;
+revoke all on function private.guard_signup() from public, anon, authenticated;
+
+drop trigger if exists erp_signups_guard on public.erp_signups;
+create trigger erp_signups_guard
+  before insert on public.erp_signups
+  for each row execute function private.guard_signup();
+
+
+-- ---------------------------------------------------------------------
 -- 4) Turn channels on (run only the lines you need, with your values).
 --    To change a value later: update vault.secrets set secret = '...' where name = '...';
 -- ---------------------------------------------------------------------

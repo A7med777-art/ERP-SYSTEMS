@@ -70,3 +70,19 @@ Delivery log: `select status_code, content, created from net._http_response orde
    `CNAME  systems  →  a7med777-art.github.io` (Proxy status: DNS only).
 2. Add a file named `CNAME` at the repo root containing `systems.concretech-trading.com`.
 3. The Publish site workflow writes it to `gh-pages`; then Settings → Pages → tick "Enforce HTTPS".
+
+## Security
+
+Safe whether the repository is public or private: nothing in it is secret. The Supabase key in
+`index.html` is the *publishable* key, which can only do what the database rules allow.
+
+| Layer | Protection |
+|---|---|
+| Database | Visitors can only **add** a request: reading, editing, deleting, truncating and dropping are refused. Field lengths, email format, plan and module lists are enforced by the database. |
+| Anti-spam | Max 5 requests/hour per internet address, 3/day per email, 300/hour site-wide (`private.guard_signup`). Status, date and id are set by the server. Addresses are stored only as hashes. |
+| Secrets | Notification keys live in Supabase Vault in the `private` schema, which the public key cannot reach. |
+| Page | Strict Content-Security-Policy (only the page's own scripts by hash; data can go only to Supabase), no-referrer, refuses to run inside another site's frame, all user text rendered as plain text. |
+| Pipeline | GitHub Actions pinned to exact versions, Dependabot for updates, each deploy checks the live site and the database rules. |
+
+Run the attack test any time: paste `supabase/security_test.sql` into the SQL Editor — every row must say `PASS`.
+After editing a `<script>` in `index.html`, run `python3 scripts/csp.py index.html` (the deploy also does it).

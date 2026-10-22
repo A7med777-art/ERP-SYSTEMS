@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Z273taaHxpet7yN71B4/vJ+1AmRVGD32Po8eZWhPZaU=' 'sha256-dk01F553BVcwyUjCCVh6cFU30+VRYnWskhRXpxzkWeE='; style-src 'unsafe-inline'; img-src data:; font-src data:; media-src https://d8j0ntlcm91z4.cloudfront.net; connect-src https://vtzzqhbtnqudhtxnbykm.supabase.co; base-uri 'none'; form-action 'none'; object-src 'none'; upgrade-insecure-requests">
+<meta name="referrer" content="no-referrer">
 <title>ERP &amp; CRM for Business Owners</title>
 <meta name="description" content="Custom ERP and CRM systems for business owners. Pick your modules and your industry, share your data, and we build and launch your system.">
 <meta name="theme-color" content="#000000">
@@ -353,7 +355,7 @@ html.intro h1 .ln>span{transform:translateY(120%)}
 </style>
 <script>
 /* Arm the entrance before first paint so the finished page never flashes. */
-(function(){try{var d=document.documentElement;if('animate' in d&&!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)){d.classList.add('intro')}}catch(e){}})();
+(function(){try{if(window.top!==window.self){document.documentElement.style.display='none';try{window.top.location=window.self.location.href}catch(e){}return}var d=document.documentElement;if('animate' in d&&!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)){d.classList.add('intro')}}catch(e){}})();
 </script>
 </head>
 <body>
@@ -938,10 +940,10 @@ html.intro h1 .ln>span{transform:translateY(120%)}
       body:JSON.stringify(row),
       signal:ctl?ctl.signal:undefined
     }).then(function(r){
-      if(!r.ok&&r.status!==409)return r.text().then(function(t){throw new Error(t||('HTTP '+r.status))});   // 409: this id already arrived
+      if(!r.ok&&r.status!==409)return r.text().then(function(t){var e=new Error(t||('HTTP '+r.status));e.limited=/rate_limited/.test(t);throw e});   // 409: this id already arrived
       finished(row);
-    }).catch(function(){
-      err.textContent='We couldn’t send your request. Check your connection and try again.';
+    }).catch(function(x){
+      err.textContent=x&&x.limited?'We already received several requests from you. We’ll be in touch soon, or try again in an hour.':'We couldn’t send your request. Check your connection and try again.';
     }).then(function(){
       clearTimeout(timer); sending=false; nextBtn.removeAttribute('aria-busy');
       if(!done.classList.contains('on'))nextLb.textContent='Submit request';
