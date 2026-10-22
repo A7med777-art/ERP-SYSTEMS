@@ -1,0 +1,47 @@
+name: Load test and live status
+
+# Manual: Actions → "Load test and live status" → Run workflow.
+on:
+  workflow_dispatch:
+    inputs:
+      total:
+        description: "Requests per scenario"
+        default: "3000"
+      concurrency:
+        description: "Simultaneous visitors"
+        default: "200"
+
+permissions:
+  contents: read
+
+jobs:
+  load:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262   # v4, pinned
+        with:
+          persist-credentials: false
+
+      - name: Where is the site reachable?
+        id: where
+        run: |
+          gh_url="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+          echo "github.io: $(curl -s -o /dev/null -w '%{http_code}' "$gh_url")  $gh_url"
+          if [ -s CNAME ]; then
+            host=$(tr -d '[:space:]' < CNAME)
+            echo "DNS for $host: $(dig +short "$host" | tr '\n' ' ')"
+            echo "https://$host/: $(curl -s -o /dev/null -w '%{http_code}' "https://$host/")"
+            echo "url=https://$host/" >> "$GITHUB_OUTPUT"
+          else
+            echo "DNS for systems.concretech-trading.com: $(dig +short systems.concretech-trading.com | tr '\n' ' ')"
+            echo "url=$gh_url" >> "$GITHUB_OUTPUT"
+          fi
+          echo "Page size (gzip): $(curl -s -H 'accept-encoding: gzip' "$gh_url" | wc -c) bytes"
+
+      - name: Load test
+        env:
+          SITE_URL: ${{ steps.where.outputs.url }}
+          TOTAL: ${{ inputs.total }}
+          CONCURRENCY: ${{ inputs.concurrency }}
+        run: node scripts/loadtest.mjs

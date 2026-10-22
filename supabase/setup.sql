@@ -160,9 +160,9 @@ create trigger erp_signups_notify
 
 -- ---------------------------------------------------------------------
 -- 3b) Anti-spam guard (runs before every insert coming from the website)
---     * max 5 requests per hour from one internet address
+--     * max 10 requests per hour from one internet address (offices share one)
 --     * max 3 requests per day for one email address
---     * max 300 requests per hour for the whole site (stops floods)
+--     * max 3000 requests per hour for the whole site (stops floods, not campaigns)
 --     * id / created_at / status are set by the server, never by the visitor
 -- ---------------------------------------------------------------------
 create table if not exists private.signup_attempts (
@@ -193,18 +193,18 @@ begin
   v_hash := encode(extensions.digest(ip, 'sha256'), 'hex');   -- the raw address is never stored
 
   if (select count(*) from private.signup_attempts a
-       where a.ip_hash = v_hash and a.at > now() - interval '1 hour') >= 5 then
+       where a.ip_hash = v_hash and a.at > now() - interval '1 hour') >= 10 then
     raise exception 'rate_limited' using errcode = 'P0001', hint = 'Too many requests from this network. Try again later.';
   end if;
   if (select count(*) from public.erp_signups s
        where lower(s.email) = lower(new.email) and s.created_at > now() - interval '24 hours') >= 3 then
     raise exception 'rate_limited' using errcode = 'P0001', hint = 'This email already sent several requests today.';
   end if;
-  if (select count(*) from public.erp_signups s where s.created_at > now() - interval '1 hour') >= 300 then
+  if (select count(*) from public.erp_signups s where s.created_at > now() - interval '1 hour') >= 3000 then
     raise exception 'rate_limited' using errcode = 'P0001', hint = 'The site is receiving too many requests. Try again later.';
   end if;
 
-  -- At most 300 rows an hour can land here (the site-wide cap), so it stays small.
+  -- At most 3000 rows an hour can land here (the site-wide cap), so it stays small.
   insert into private.signup_attempts (ip_hash) values (v_hash);
 
   new.id         := coalesce(new.id, gen_random_uuid());

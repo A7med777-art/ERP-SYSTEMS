@@ -79,7 +79,7 @@ Safe whether the repository is public or private: nothing in it is secret. The S
 | Layer | Protection |
 |---|---|
 | Database | Visitors can only **add** a request: reading, editing, deleting, truncating and dropping are refused. Field lengths, email format, plan and module lists are enforced by the database. |
-| Anti-spam | Max 5 requests/hour per internet address, 3/day per email, 300/hour site-wide (`private.guard_signup`). Status, date and id are set by the server. Addresses are stored only as hashes. |
+| Anti-spam | Max 10 requests/hour per internet address, 3/day per email, 3000/hour site-wide (`private.guard_signup`). Status, date and id are set by the server. Addresses are stored only as hashes. |
 | Secrets | Notification keys live in Supabase Vault in the `private` schema, which the public key cannot reach. |
 | Page | Strict Content-Security-Policy (only the page's own scripts by hash; data can go only to Supabase), no-referrer, refuses to run inside another site's frame, all user text rendered as plain text. |
 | Pipeline | GitHub Actions pinned to exact versions, Dependabot for updates, each deploy checks the live site and the database rules. |

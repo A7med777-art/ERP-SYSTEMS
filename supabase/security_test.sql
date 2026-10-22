@@ -39,9 +39,9 @@ select pg_temp.try_as_anon('No modules', 'BLOCKED', 'insert into public.erp_sign
 select pg_temp.try_as_anon('Invalid plan', 'BLOCKED', 'insert into public.erp_signups(modules,industry,company_name,contact_name,email,plan) values (array[''sales''],''Retail'',''X'',''Y'',''p@example.com'',''free-forever'')', '{"x-forwarded-for":"10.0.0.4"}');
 select pg_temp.try_as_anon('Normal request', 'SUCCEEDED', 'insert into public.erp_signups(id,modules,industry,company_name,contact_name,email,status,created_at) values (''11111111-1111-1111-1111-111111111111'',array[''sales''],''Retail'',''Sec Test'',''Tester'',''  Forge@Example.com '',''active'',''2000-01-01'')', '{"x-forwarded-for":"10.0.0.5"}');
 
-select pg_temp.try_as_anon('Same network, request ' || g, case when g <= 5 then 'SUCCEEDED' else 'BLOCKED' end,
+select pg_temp.try_as_anon('Same network, request ' || g, case when g <= 10 then 'SUCCEEDED' else 'BLOCKED' end,
   format('insert into public.erp_signups(modules,industry,company_name,contact_name,email) values (array[''sales''],''Retail'',''Flood'',''Bot'',''bot%s@example.com'')', g),
-  '{"x-forwarded-for":"203.0.113.7"}') from generate_series(1,6) g;
+  '{"x-forwarded-for":"203.0.113.7"}') from generate_series(1,11) g;
 select pg_temp.try_as_anon('Same email, request ' || g, case when g <= 3 then 'SUCCEEDED' else 'BLOCKED' end,
   'insert into public.erp_signups(modules,industry,company_name,contact_name,email) values (array[''sales''],''Retail'',''Spam'',''Bot'',''same@example.com'')',
   format('{"x-forwarded-for":"198.51.100.%s"}', g)) from generate_series(1,4) g;
