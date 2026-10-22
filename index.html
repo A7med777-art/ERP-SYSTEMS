@@ -210,12 +210,30 @@ textarea.inp{resize:vertical;min-height:calc(84*var(--j))}
 .btn-join svg{width:calc(21.5*var(--j));height:calc(18*var(--j))}
 .btn-join[aria-busy="true"]{background:#7d1112;cursor:progress}
 .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
-.jdone{display:none;margin-top:calc(60*var(--j))}
-.jdone.on{display:block;animation:stepin .7s cubic-bezier(.16,1,.3,1) both}
+.step.on.back{animation-name:stepback}
+@keyframes stepback{from{opacity:0;transform:translateY(calc(-14*var(--j)))}to{opacity:1;transform:none}}
+.rev{margin:calc(26*var(--j)) 0 0;border-top:1px solid rgba(255,255,255,.12)}
+.rv{display:grid;grid-template-columns:calc(150*var(--j)) minmax(0,1fr) auto;column-gap:calc(24*var(--j));align-items:baseline;padding:calc(16*var(--j)) 0;border-bottom:1px solid rgba(255,255,255,.12)}
+.rv dt{font:400 calc(11.5*var(--j))/1.3 'JB';letter-spacing:.2em;text-transform:uppercase;color:var(--lab)}
+.rv dd{margin:0;min-width:0;font:500 calc(17.5*var(--j))/1.35 'SG';letter-spacing:calc(-.4*var(--j));color:#fff;overflow-wrap:anywhere}
+.rv dd small{display:block;margin-top:calc(5*var(--j));font:400 calc(12.5*var(--j))/1.5 'JB';letter-spacing:calc(-.2*var(--j));color:var(--lab)}
+.rv-ed{font:400 calc(14*var(--j))/1 'JB';color:var(--sub);padding:calc(6*var(--j)) 0;border-bottom:1px solid rgba(255,255,255,.3);transition:color .2s,border-color .2s}
+.rv.flash{animation:flash 1.2s cubic-bezier(.22,1,.36,1)}
+@keyframes flash{0%{background:rgba(200,27,28,.22)}100%{background:transparent}}
+.jdone{display:none;margin-top:calc(54*var(--j))}
+.jdone.on{display:block}
+.jdone.on>*{animation:stepin .8s cubic-bezier(.16,1,.3,1) both}
+.jdone.on>:nth-child(2){animation-delay:.18s}.jdone.on>:nth-child(3){animation-delay:.26s}.jdone.on>:nth-child(4){animation-delay:.34s}.jdone.on>:nth-child(5){animation-delay:.42s}
+.jcheck{display:block;width:calc(56*var(--j));height:calc(56*var(--j));margin-bottom:calc(26*var(--j));background:var(--red)}
+.jcheck path{fill:none;stroke:#fff;stroke-width:3;stroke-dasharray:30;stroke-dashoffset:30}
+.jdone.on .jcheck path{animation:draw .55s cubic-bezier(.65,0,.35,1) .35s forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.jdone-act{display:flex;flex-wrap:wrap;align-items:center;gap:calc(28*var(--j));margin-top:calc(36*var(--j))}
+.jdone .btn{margin-top:0}
+.jagain{font:400 calc(15*var(--j))/1 'JB';color:var(--sub);padding:calc(8*var(--j)) 0;border-bottom:1px solid rgba(255,255,255,.3);transition:color .2s,border-color .2s}
 .jref{margin-top:calc(28*var(--j));display:flex;gap:calc(34*var(--j));flex-wrap:wrap;border-top:1px solid rgba(255,255,255,.12);padding-top:calc(22*var(--j))}
 .jref div{font:400 calc(12*var(--j))/1.5 'JB';letter-spacing:.16em;text-transform:uppercase;color:var(--lab)}
 .jref b{display:block;margin-top:calc(6*var(--j));font:480 calc(22*var(--j))/1 'JB';letter-spacing:0;text-transform:none;color:#fff}
-.jdone .btn{margin-top:calc(36*var(--j))}
 
 /* ---------- hover (pointer devices only) ---------- */
 @media (hover:hover){
@@ -226,6 +244,7 @@ textarea.inp{resize:vertical;min-height:calc(84*var(--j))}
   .mrow:hover{color:var(--red)}
   .msub a:hover{color:#fff}
   .jback:hover{color:var(--red)}
+  .rv-ed:hover,.jagain:hover{color:var(--red);border-color:var(--red)}
   .join-x:hover::before,.join-x:hover::after{background:var(--red)}
   .opt:hover{border-bottom-color:rgba(255,255,255,.32)}
   .opt:hover .box{border-color:#fff}
@@ -320,6 +339,8 @@ html.intro h1 .ln>span{transform:translateY(120%)}
   .jh{font-size:calc(34*var(--j));letter-spacing:calc(-1.1*var(--j))}
   .jp{font-size:calc(14*var(--j))}
   .opts,.fields{grid-template-columns:1fr}
+  .rv{grid-template-columns:minmax(0,1fr) auto;row-gap:calc(8*var(--j))}
+  .rv dd{grid-column:1 / -1;grid-row:2}
   .seg span{padding:calc(11*var(--j)) calc(13*var(--j));font-size:calc(13.5*var(--j))}
   .btn-join{min-width:calc(185*var(--j));height:calc(52*var(--j))}
   .btn-join .lb{font-size:calc(18*var(--j))}
@@ -327,6 +348,7 @@ html.intro h1 .ln>span{transform:translateY(120%)}
 
 @media (prefers-reduced-motion:reduce){
   *{transition:none!important;animation:none!important}
+  .jcheck path{stroke-dashoffset:0}
 }
 </style>
 <script>
@@ -465,8 +487,8 @@ html.intro h1 .ln>span{transform:translateY(120%)}
   <div class="join-sc">
     <div class="join-in">
       <div class="jtop">
-        <span class="jeye" id="jeye">Build your ERP &nbsp;/&nbsp; 01 of 04</span>
-        <span class="jprog" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i></span>
+        <span class="jeye" id="jeye">Build your ERP &nbsp;/&nbsp; 01 of 05</span>
+        <span class="jprog" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i><i></i></span>
       </div>
 
       <form id="jform" novalidate>
@@ -573,6 +595,12 @@ html.intro h1 .ln>span{transform:translateY(120%)}
           </div>
         </fieldset>
 
+        <fieldset class="step" data-step="4">
+          <legend class="jh" tabindex="-1">Check your request.</legend>
+          <p class="jp">Make sure everything looks right. Use Edit to change any part and you’ll come straight back here.</p>
+          <dl class="rev" id="rev"></dl>
+        </fieldset>
+
         <p class="jerr" id="jerr" role="alert" aria-live="assertive"></p>
         <div class="jnav" id="jnav">
           <button class="jback" type="button" hidden>&larr; Back</button>
@@ -581,6 +609,7 @@ html.intro h1 .ln>span{transform:translateY(120%)}
       </form>
 
       <div class="jdone" id="jdone" aria-live="polite">
+        <svg class="jcheck" viewBox="0 0 56 56" aria-hidden="true"><path d="M17 29l7.5 7.5L39.5 21"/></svg>
         <h2 class="jh" tabindex="-1">Request received.</h2>
         <p class="jp" id="jdone-p">We’ll reach out shortly with a plan for your system.</p>
         <div class="jref">
@@ -588,7 +617,10 @@ html.intro h1 .ln>span{transform:translateY(120%)}
           <div>Modules<b id="jref-mods">—</b></div>
           <div>Industry<b id="jref-ind">—</b></div>
         </div>
-        <button class="btn btn-join" type="button" id="jfinish"><span class="lb">Back to site</span><svg aria-hidden="true"><use href="#arrow"/></svg></button>
+        <div class="jdone-act">
+          <button class="btn btn-join" type="button" id="jfinish"><span class="lb">Back to site</span><svg aria-hidden="true"><use href="#arrow"/></svg></button>
+          <button class="jagain" type="button" id="jagain">Start another request</button>
+        </div>
       </div>
     </div>
   </div>
@@ -715,7 +747,8 @@ html.intro h1 .ln>span{transform:translateY(120%)}
 
   var join=$('#join'), form=$('#jform'), steps=$$('.step',form), err=$('#jerr'), back=$('.jback',form);
   var nextBtn=$('#jnav .btn-join'), nextLb=$('.lb',nextBtn), eye=$('#jeye'), segs=$$('.jprog i'), done=$('#jdone');
-  var cur=0, lastFocus=null, sending=false;
+  var REVIEW=steps.length-1, cur=0, lastFocus=null, sending=false, editing=false, pendingId=null;
+  var reduce=mqReduce.matches;
 
   function openJoin(){
     if(body.classList.contains('join-open'))return;
@@ -753,18 +786,25 @@ html.intro h1 .ln>span{transform:translateY(120%)}
     else closeDrops();
   });
 
-  function show(i){
+  function show(i,flashRow){
+    var backwards=i<cur;
     cur=i;
-    steps.forEach(function(s,j){s.classList.toggle('on',j===i)});
+    if(i===REVIEW){editing=false;renderReview()}
+    steps.forEach(function(s,j){s.classList.toggle('on',j===i);s.classList.toggle('back',j===i&&backwards)});
     segs.forEach(function(g,j){g.className=j<i?'done':(j===i?'on':'')});
-    eye.innerHTML='Build your ERP &nbsp;/&nbsp; 0'+(i+1)+' of 04';
-    back.hidden=i===0;
-    nextLb.textContent=i===steps.length-1?'Submit request':'Continue';
+    eye.innerHTML='Build your ERP &nbsp;/&nbsp; 0'+(i+1)+' of 0'+steps.length;
+    back.hidden=i===0&&!editing;
+    back.innerHTML=editing?'&larr; Back to review':'&larr; Back';
+    nextLb.textContent=i===REVIEW?'Submit request':(editing?'Save changes':(i===REVIEW-1?'Review request':'Continue'));
     err.textContent='';
     $('.join-sc').scrollTop=0;
     var h=$('.jh',steps[i]); h&&h.focus({preventScroll:true});
+    if(flashRow!=null){var r=$('.rv[data-go="'+flashRow+'"]',steps[i]);if(r){r.classList.remove('flash');void r.offsetWidth;r.classList.add('flash')}}
   }
-  back.addEventListener('click',function(){if(cur>0)show(cur-1)});
+  back.addEventListener('click',function(){
+    if(editing){var from=cur;show(REVIEW,from);return}   // leave edit mode without losing anything
+    if(cur>0)show(cur-1);
+  });
 
   var indOther=$('#ind-other');
   $$('input[name="industry"]',form).forEach(function(r){r.addEventListener('change',function(){
@@ -801,9 +841,48 @@ html.intro h1 .ln>span{transform:translateY(120%)}
   }
   function opt(v){return v?v:null}
 
+  /* ---- review: everything on one screen, each part one tap from editing ---- */
+  function labelFor(name,value){
+    var i=$$('input[name="'+name+'"]',form).filter(function(x){return x.value===value})[0];
+    var l=i&&i.closest('label'); if(!l)return value;
+    var t=$('.ot',l)||$('span:last-child',l); return t?t.textContent:value;
+  }
+  function esc(t){return String(t).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+  function renderReview(){
+    var ind=val('industry')==='other'?val('industry_other'):labelFor('industry',val('industry'));
+    var data=[val('company_size')?labelFor('company_size',val('company_size'))+' people':'',
+              vals('data_sources').map(function(v){return labelFor('data_sources',v)}).join(', '),
+              val('record_volume')?labelFor('record_volume',val('record_volume'))+' records':'',
+              val('current_system')].filter(Boolean);
+    var contact=[val('contact_name'),val('email'),val('phone'),val('country')].filter(Boolean);
+    var rows=[
+      [0,'Modules',vals('modules').map(function(v){return labelFor('modules',v)}).join(' · ')],
+      [1,'Industry',ind],
+      [2,'Your data',data.shift()||'—',data.join(' · ')],
+      [3,'Company',val('company_name'),contact.join(' · ')],
+      [3,'Plan',labelFor('plan',val('plan')||'growth'),val('notes')]
+    ];
+    $('#rev').innerHTML=rows.map(function(r){
+      return '<div class="rv" data-go="'+r[0]+'"><dt>'+esc(r[1])+'</dt><dd>'+esc(r[2]||'—')+(r[3]?'<small>'+esc(r[3])+'</small>':'')+'</dd>'+
+             '<button class="rv-ed" type="button" data-go="'+r[0]+'" aria-label="Edit '+esc(r[1].toLowerCase())+'">Edit</button></div>';
+    }).join('');
+  }
+  $('#rev').addEventListener('click',function(e){
+    var b=e.target.closest&&e.target.closest('.rv-ed'); if(!b)return;
+    editing=true; show(+b.dataset.go);
+  });
+
   function finished(row){
-    form.style.display='none';
-    $('.jtop').style.visibility='hidden';
+    var outro=function(){
+      form.style.display='none';
+      $('.jtop').style.visibility='hidden';
+      reveal(row);
+    };
+    if(reduce||!form.animate){outro();return}
+    var a=form.animate([{opacity:1,transform:'none'},{opacity:0,transform:'translateY(-10px)'}],{duration:260,easing:'cubic-bezier(.4,0,1,1)',fill:'forwards'});
+    a.onfinish=function(){outro();a.cancel()};
+  }
+  function reveal(row){
     $('#jref-id').textContent=row.id.slice(0,8).toUpperCase();
     $('#jref-mods').textContent=row.modules.map(function(m){return MOD_NAMES[m]||m}).join(' · ');
     $('#jref-ind').textContent=row.industry;
@@ -814,16 +893,25 @@ html.intro h1 .ln>span{transform:translateY(120%)}
     try{localStorage.setItem('erp_signup_ref',row.id)}catch(e){}
   }
   $('#jfinish').addEventListener('click',closeJoin);
+  $('#jagain').addEventListener('click',function(){
+    form.reset(); pendingId=null; editing=false;
+    indOther.classList.remove('on');
+    $$('.inp.bad',form).forEach(function(i){i.classList.remove('bad')});
+    done.classList.remove('on');
+    form.style.display=''; $('.jtop').style.visibility='';
+    cur=0; show(0);
+  });
 
   form.addEventListener('submit',function(e){
     e.preventDefault();
     if(sending)return;
     if(!validate(cur))return;
-    if(cur<steps.length-1){show(cur+1);return}
+    if(cur<REVIEW){var from=cur;show(editing?REVIEW:cur+1,editing?from:null);return}
+    for(var k=0;k<REVIEW;k++){if(!validate(k)){var m=err.textContent;editing=true;show(k);err.textContent=m;return}}
 
     var ind=val('industry')==='other'?val('industry_other'):val('industry');
     var row={
-      id:uuid(),
+      id:pendingId||(pendingId=uuid()),   // same id on retry, so a lost response can't create a duplicate
       plan:val('plan')||'growth',
       modules:vals('modules'),
       industry:ind.slice(0,80),
@@ -850,7 +938,7 @@ html.intro h1 .ln>span{transform:translateY(120%)}
       body:JSON.stringify(row),
       signal:ctl?ctl.signal:undefined
     }).then(function(r){
-      if(!r.ok)return r.text().then(function(t){throw new Error(t||('HTTP '+r.status))});
+      if(!r.ok&&r.status!==409)return r.text().then(function(t){throw new Error(t||('HTTP '+r.status))});   // 409: this id already arrived
       finished(row);
     }).catch(function(){
       err.textContent='We couldn’t send your request. Check your connection and try again.';
