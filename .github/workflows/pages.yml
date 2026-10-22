@@ -5,7 +5,7 @@ name: Publish site
 on:
   push:
     branches: [main, claude/magical-pascal-dvin1v]
-    paths: [index.html, scripts/verify.sh, .github/workflows/pages.yml]
+    paths: [index.html, CNAME, scripts/verify.sh, .github/workflows/pages.yml]
   workflow_dispatch:
     inputs:
       insert_test:
@@ -38,6 +38,9 @@ jobs:
           cp index.html site/index.html
           cp index.html site/404.html
           touch site/.nojekyll
+          # Custom domain: put the hostname (e.g. systems.concretech-trading.com) in a CNAME file
+          # at the repo root only after its DNS record points to <owner>.github.io.
+          if [ -s CNAME ]; then cp CNAME site/CNAME; fi
           cd site
           git init -q -b gh-pages
           git config user.name "github-actions[bot]"
@@ -50,4 +53,6 @@ jobs:
         env:
           SITE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
           INSERT_TEST: ${{ inputs.insert_test || 'false' }}
-        run: bash scripts/verify.sh
+        run: |
+          if [ -s CNAME ]; then export SITE_URL="https://$(tr -d '[:space:]' < CNAME)/"; fi
+          bash scripts/verify.sh

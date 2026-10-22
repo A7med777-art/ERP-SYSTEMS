@@ -46,4 +46,27 @@ form traffic goes straight to Supabase.
 
 ## Database
 
-`supabase/migrations/20261021000000_erp_signups.sql` is the schema that is already applied.
+`supabase/setup.sql` is the complete, re-runnable setup (table, rules, security, notifications).
+Paste it into Supabase → SQL Editor → Run. It never drops the table or deletes rows.
+`supabase/migrations/` keeps the original migration for history.
+
+## New-request notifications
+
+Every new row fires a database trigger (`private.on_new_signup`) that sends an alert through
+`pg_net`. Channel keys live in Supabase Vault, never in the website:
+
+| Channel | Vault secret names | Cost |
+|---|---|---|
+| Phone push (ntfy app) | `lead_ntfy_topic` | free, no account |
+| WhatsApp (CallMeBot) | `lead_whatsapp_phone`, `lead_callmebot_apikey` | free |
+| Email (Resend) | `lead_resend_api_key`, `lead_notify_email` | free tier |
+
+See section 4 of `setup.sql` for the exact lines to turn each one on.
+Delivery log: `select status_code, content, created from net._http_response order by created desc;`
+
+## Custom subdomain
+
+1. In Cloudflare (zone `concretech-trading.com`) → DNS → Add record:
+   `CNAME  systems  →  a7med777-art.github.io` (Proxy status: DNS only).
+2. Add a file named `CNAME` at the repo root containing `systems.concretech-trading.com`.
+3. The Publish site workflow writes it to `gh-pages`; then Settings → Pages → tick "Enforce HTTPS".
