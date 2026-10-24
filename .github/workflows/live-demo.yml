@@ -1,0 +1,49 @@
+name: Live demo request
+
+# Manual: Actions → "Live demo request" → Run workflow.
+# A real browser opens the public site and submits the form, so the request is saved
+# and your notifications (push / email / WhatsApp) fire exactly as for a real client.
+on:
+  workflow_dispatch:
+    inputs:
+      name:
+        description: "Contact name to submit"
+        default: "Ahmed (live test)"
+      email:
+        description: "Email to submit (the client's email field)"
+        required: true
+      phone:
+        description: "Phone (optional)"
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  demo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262   # v4, pinned
+        with:
+          persist-credentials: false
+
+      - name: Install browser
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.56.1
+          npx playwright install --with-deps chromium
+
+      - name: Submit a demo request on the live site
+        env:
+          SITE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
+          DEMO_NAME: ${{ inputs.name }}
+          DEMO_EMAIL: ${{ inputs.email }}
+          DEMO_PHONE: ${{ inputs.phone }}
+        run: node scripts/e2e.mjs
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02   # v4, pinned
+        if: always()
+        with:
+          name: confirmation-screenshot
+          path: confirmation.png
+          if-no-files-found: ignore
