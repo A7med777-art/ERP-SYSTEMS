@@ -5,7 +5,7 @@ name: Publish site
 on:
   push:
     branches: [main, claude/magical-pascal-dvin1v]
-    paths: [index.html, CNAME, scripts/verify.sh, .github/workflows/pages.yml]
+    paths: [src/**, index.html, CNAME, scripts/**, .github/workflows/pages.yml]
   workflow_dispatch:
     inputs:
       insert_test:
@@ -32,13 +32,12 @@ jobs:
         run: |
           test -s index.html
           grep -q '</html>' index.html
-          grep -q 'id="jform"' index.html
+          grep -q 'id="jform"' src/index.html
 
       - name: Push to gh-pages
         run: |
           mkdir site
-          cp index.html site/index.html
-          python3 scripts/csp.py site/index.html   # CSP always matches the scripts being shipped
+          python3 scripts/build.py site/index.html   # fonts + Motion inlined, CSP hashes always current
           cp site/index.html site/404.html
           touch site/.nojekyll
           # Custom domain: put the hostname (e.g. systems.concretech-trading.com) in a CNAME file

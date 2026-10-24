@@ -19,8 +19,8 @@ const step = async (label, fn) => { await fn(); console.log("✓ " + label); };
 const next = () => page.click("#jnav .btn-join");
 
 await step(`Open ${SITE_URL}`, () => page.goto(SITE_URL, { waitUntil: "load" }));
-await step("Headline is visible", () => page.getByText("Run your whole business").waitFor());
-await step("Click \"Build my ERP\"", () => page.click(".btn-cta"));
+await step("Arabic headline is visible", () => page.getByText("شغّل شركتك كلها").waitFor());
+await step("Click \"ابنِ نظامك\"", () => page.click(".btn-cta"));
 await step("Step 1 — pick modules", async () => {
   await page.check("input[value=sales]", { force: true });
   await page.check("input[value=inventory]", { force: true });
@@ -51,7 +51,7 @@ const [response] = await Promise.all([
   next(),
 ]);
 console.log(`  Supabase answered ${response.status()}`);
-await step("Confirmation \"Request received.\" appears", () => page.getByText("Request received.").waitFor({ timeout: 15000 }));
+await step("Confirmation \"طلبك وصل.\" appears", () => page.getByText("طلبك وصل.").waitFor({ timeout: 15000 }));
 console.log("  Reference shown to the client: " + (await page.textContent("#jref-id")));
 await page.screenshot({ path: "confirmation.png" });
 

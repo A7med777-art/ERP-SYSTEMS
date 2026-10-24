@@ -1,7 +1,8 @@
 # ERP & CRM for Business Owners — landing page & client onboarding
 
-Marketing site for custom ERP & CRM systems for business owners. A single self-contained
-`index.html` (fonts embedded, no frameworks): fullscreen black stage,
+Marketing site for custom ERP & CRM systems for business owners — Arabic first (RTL) with an
+English switch. Edit `src/index.html`, then `python3 scripts/build.py` produces the single-file
+`index.html` (fonts + Motion 14.1.0 inlined, CSP hashes updated). Scrolling chapters: hero video stage,
 graded looping video, one-shot entrance animation, mobile burger menu, and a 4-step onboarding
 flow where clients choose **what to build** (modules), **their industry**, and **their data**,
 then leave their company details.
