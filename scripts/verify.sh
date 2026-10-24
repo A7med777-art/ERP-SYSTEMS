@@ -29,7 +29,8 @@ code=$(api -X POST -H 'Prefer: return=minimal' "$SB_URL/rest/v1/erp_signups" \
 echo "✓ invalid data is rejected by the database ($code)"
 
 for verb in PATCH DELETE; do
-  code=$(api -X "$verb" "$SB_URL/rest/v1/erp_signups?id=neq.00000000-0000-0000-0000-000000000000")
+  # a real payload, so the request reaches the permission check instead of failing as malformed
+  code=$(api -X "$verb" -d '{"notes":"tampered"}' "$SB_URL/rest/v1/erp_signups?id=neq.00000000-0000-0000-0000-000000000000")
   [ "$code" = 401 ] || [ "$code" = 403 ] || { echo "✗ public $verb returned $code (expected refusal)"; cat /tmp/body; exit 1; }
   echo "✓ visitors cannot $verb requests ($code)"
 done
